@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>SAP UI5 MongoDB Example</title>
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <script id="sap-ui-bootstrap"
+            src="https://sapui5.hana.ondemand.com/resources/sap-ui-core.js"
+            data-sap-ui-theme="sap_belize"
+            data-sap-ui-libs="sap.m"
+            data-sap-ui-async="true"
+            data-sap-ui-resourceroots='{
+                "sap.ui.demo.mongodb": "./"
+            }'></script>
+    <script>
+        sap.ui.getCore().attachInit(function () {
+            sap.ui.require([
+                "sap/ui/core/ComponentContainer"
+            ], function (ComponentContainer) {
+                new ComponentContainer({
+                    name: "sap.ui.demo.mongodb",
+                    settings: {
+                        id: "mongodb"
+                    },
+                    async: true
+                }).placeAt("content");
+            });
+        });
+    </script>
+</head>
+<body class="sapUiBody">
+    <div id="content"></div>
+</body>
+</html>

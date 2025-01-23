@@ -1,0 +1,12 @@
+specVersion: "4.0"
+metadata:
+  name: ui5-mongodb-project
+type: application
+resources:
+  configuration:
+    paths:
+      webapp: webapp
+builder:
+  resources:
+    excludes:
+      - "/**/Component-preload.js"

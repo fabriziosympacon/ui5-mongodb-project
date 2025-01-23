@@ -1,0 +1,22 @@
+{
+  "name": "ui5-mongodb-project",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "concurrently \"npm run start-server\" \"npm run start-ui5\"",
+    "start-server": "node server.js",
+    "start-ui5": "ui5 serve"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "mongoose": "^8.9.5"
+  },
+  "devDependencies": {
+    "concurrently": "^7.6.0"
+  }
+}

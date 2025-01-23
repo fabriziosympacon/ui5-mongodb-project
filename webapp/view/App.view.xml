@@ -1,0 +1,7 @@
+<mvc:View xmlns:mvc="sap.ui.core.mvc" xmlns="sap.m" controllerName="sap.ui.demo.mongodb.controller.App">
+    <App id="app">
+        <pages>
+            <mvc:XMLView viewName="sap.ui.demo.mongodb.view.Main"/>
+        </pages>
+    </App>
+</mvc:View>
