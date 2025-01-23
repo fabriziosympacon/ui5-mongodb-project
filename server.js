@@ -27,16 +27,22 @@ const DataSchema = new mongoose.Schema({
 
 const Data = mongoose.model('Data', DataSchema);
 
-// API endpoint to get data with optional filter
+// API endpoint to get unique data
 app.get('/api/data', async (req, res) => {
     const filter = req.query.filter ? JSON.parse(req.query.filter) : {};
     try {
-        const data = await Data.find(filter);
+        const data = await Data.aggregate([
+            { $match: filter },
+            { $group: { _id: "$Archivierungsobjekt", doc: { $first: "$$ROOT" } } },
+            { $replaceRoot: { newRoot: "$doc" } }
+        ]);
         res.json(data);
     } catch (err) {
         res.status(500).send(err);
     }
 });
+
+module.exports = app;
 
 // Start the server
 const port = process.env.PORT || 3000;
