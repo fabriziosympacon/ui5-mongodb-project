@@ -5,8 +5,8 @@
         <content>
             <VBox>
                 <HBox>
-                    <Label text="Filter: "/>
-                    <Input id="filterInput" placeholder="Enter filter as JSON"/>
+                    <Label text="Archivierungsobjekt: "/>
+                    <Input id="archivierungsobjektInput" placeholder="Enter Archivierungsobjekt value"/>
                     <Button text="Apply Filter" press="onApplyFilter"/>
                 </HBox>
                 <HBox>
@@ -26,7 +26,7 @@
                         <Column visible="{dataModel>/showEN}">
                             <Text text="O_EN"/>
                         </Column>
-                        <Column visible="{= !${dataModel>/showEN} }">
+                        <Column visible="{dataModel>/showDE}">
                             <Text text="O_DE"/>
                         </Column>
                         <Column>
@@ -35,7 +35,7 @@
                         <Column visible="{dataModel>/showEN}">
                             <Text text="V_EN"/>
                         </Column>
-                        <Column visible="{= !${dataModel>/showEN} }">
+                        <Column visible="{dataModel>/showDE}">
                             <Text text="V_DE"/>
                         </Column>
                     </columns>
@@ -44,10 +44,10 @@
                             <cells>
                                 <Text text="{dataModel>Archivierungsobjekt}"/>
                                 <Text text="{dataModel>O_EN}" visible="{dataModel>/showEN}"/>
-                                <Text text="{dataModel>O_DE}" visible="{= !${dataModel>/showEN} }"/>
+                                <Text text="{dataModel>O_DE}" visible="{dataModel>/showDE}"/>
                                 <Text text="{dataModel>Vorgaenger}"/>
                                 <Text text="{dataModel>V_EN}" visible="{dataModel>/showEN}"/>
-                                <Text text="{dataModel>V_DE}" visible="{= !${dataModel>/showEN} }"/>
+                                <Text text="{dataModel>V_DE}" visible="{dataModel>/showDE}"/>
                             </cells>
                         </ColumnListItem>
                     </items>

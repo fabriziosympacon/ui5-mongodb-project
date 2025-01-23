@@ -10,6 +10,7 @@ sap.ui.define([
             // Initialize the model and set it to the view
             var oModel = new JSONModel({
                 showEN: false, // Initialize the property for toggling columns to show DE columns by default
+                showDE: true, // Initialize the property for toggling columns to show DE columns by default
                 data: [] // Initialize data array
             });
             this.getView().setModel(oModel, "dataModel");
@@ -44,23 +45,24 @@ sap.ui.define([
         },
         
         onApplyFilter: function () {
-            var sFilter = this.byId("filterInput").getValue();
-            try {
-                var oFilter = sFilter ? JSON.parse(sFilter) : {};
-                this.loadData(oFilter);
-            } catch (e) {
-                MessageToast.show("Invalid filter JSON");
+            var sArchivierungsobjekt = this.byId("archivierungsobjektInput").getValue();
+            var oFilter = {};
+            if (sArchivierungsobjekt) {
+                oFilter.Archivierungsobjekt = sArchivierungsobjekt;
             }
+            this.loadData(oFilter);
         },
         
         onShowEN: function () {
             console.log("Show EN button pressed");
             this.getView().getModel("dataModel").setProperty("/showEN", true);
+            this.getView().getModel("dataModel").setProperty("/showDE", false);
         },
         
         onShowDE: function () {
             console.log("Show DE button pressed");
             this.getView().getModel("dataModel").setProperty("/showEN", false);
+            this.getView().getModel("dataModel").setProperty("/showDE", true);
         }
     });
 });

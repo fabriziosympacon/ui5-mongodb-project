@@ -2,10 +2,11 @@
   "name": "ui5-mongodb-project",
   "version": "1.0.0",
   "main": "index.js",
-  "scripts": {
+"scripts": {
     "start": "concurrently \"npm run start-server\" \"npm run start-ui5\"",
     "start-server": "node server.js",
-    "start-ui5": "ui5 serve"
+    "start-ui5": "ui5 serve",
+    "build": "ui5 build --all --dest dist"
   },
   "keywords": [],
   "author": "",
