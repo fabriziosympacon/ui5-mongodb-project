@@ -25,7 +25,7 @@ sap.ui.define([
                 MessageToast.show("Data model is not set");
                 return;
             }
-            var sUrl = "http://localhost:3000/data";
+            var sUrl = "/api/data";
             if (filter) {
                 sUrl += "?filter=" + encodeURIComponent(JSON.stringify(filter));
             }
