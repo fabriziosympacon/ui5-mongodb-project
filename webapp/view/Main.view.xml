@@ -1,6 +1,7 @@
 <mvc:View controllerName="sap.ui.demo.mongodb.controller.Main"
           xmlns:mvc="sap.ui.core.mvc"
-          xmlns="sap.m">
+          xmlns="sap.m"
+          xmlns:table="sap.ui.table">
     <Page title="Netzplan Archivierungsobjekte">
         <content>
             <VBox>
@@ -10,28 +11,28 @@
                     <Button text="Show EN" press="onShowEN"/>
                     <Button text="Show DE" press="onShowDE"/>
                 </HBox>
-                <Table id="dataTable" items="{dataModel>/data}">
-                    <columns>
-                        <Column>
-                            <Text text="Archivierungsobjekt"/>
-                        </Column>
-                        <Column visible="{dataModel>/showEN}">
-                            <Text text="O_EN"/>
-                        </Column>
-                        <Column visible="{dataModel>/showDE}">
-                            <Text text="O_DE"/>
-                        </Column>
-                    </columns>
-                    <items>
-                        <ColumnListItem>
-                            <cells>
+                <table:Table id="dataTable" rows="{dataModel>/data}" visibleRowCount="10" selectionMode="None">
+                    <table:columns>
+                        <table:Column>
+                            <Label text="Archivierungsobjekt"/>
+                            <table:template>
                                 <Text text="{dataModel>Archivierungsobjekt}"/>
+                            </table:template>
+                        </table:Column>
+                        <table:Column visible="{dataModel>/showEN}">
+                            <Label text="O_EN"/>
+                            <table:template>
                                 <Text text="{dataModel>O_EN}" visible="{dataModel>/showEN}"/>
+                            </table:template>
+                        </table:Column>
+                        <table:Column visible="{dataModel>/showDE}">
+                            <Label text="O_DE"/>
+                            <table:template>
                                 <Text text="{dataModel>O_DE}" visible="{dataModel>/showDE}"/>
-                            </cells>
-                        </ColumnListItem>
-                    </items>
-                </Table>
+                            </table:template>
+                        </table:Column>
+                    </table:columns>
+                </table:Table>
             </VBox>
         </content>
     </Page>
