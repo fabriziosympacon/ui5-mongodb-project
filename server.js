@@ -16,14 +16,12 @@ app.use(express.json());
 
 // MongoDB connection with error handling
 mongoose.connect(process.env.MONGODB_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
     serverSelectionTimeoutMS: 5000,
     w: 'majority' // Added the w option with 'majority' value
 }).then(() => {
     console.log('Connected to MongoDB Atlas');
 }).catch(err => {
-    console.error('MongoDB connection error:', err);
+    console.error('MongoDB connection error:', err.stack); // Log the stack trace
     process.exit(1);
 });
 
