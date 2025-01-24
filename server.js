@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const path = require('path');
 
 const app = express();
 
@@ -14,14 +15,17 @@ app.use(cors({
 
 app.use(express.json());
 
+// Serve static files from the 'public' directory
+app.use(express.static(path.join(__dirname, 'public')));
+
 // MongoDB connection with error handling
 mongoose.connect(process.env.MONGODB_URI, {
     serverSelectionTimeoutMS: 5000,
-    w: 'majority' // Added the w option with 'majority' value
+    w: 'majority'
 }).then(() => {
     console.log('Connected to MongoDB Atlas');
 }).catch(err => {
-    console.error('MongoDB connection error:', err.stack); // Log the stack trace
+    console.error('MongoDB connection error:', err.stack);
     process.exit(1);
 });
 
@@ -53,6 +57,11 @@ app.get('/api/data', async (req, res) => {
         console.error('API Error:', err);
         res.status(500).json({ error: 'Internal Server Error' });
     }
+});
+
+// Serve the index.html file for all other routes
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 module.exports = app;
