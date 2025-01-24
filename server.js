@@ -18,7 +18,8 @@ app.use(express.json());
 mongoose.connect(process.env.MONGODB_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
-    serverSelectionTimeoutMS: 5000
+    serverSelectionTimeoutMS: 5000,
+    w: 'majority' // Added the w option with 'majority' value
 }).then(() => {
     console.log('Connected to MongoDB Atlas');
 }).catch(err => {
