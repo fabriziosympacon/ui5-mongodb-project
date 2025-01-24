@@ -25,16 +25,10 @@ sap.ui.define([
                 MessageToast.show("Data model is not set");
                 return;
             }
-
-            // Environment-aware URL configuration
-            var sUrl = window.location.hostname === "localhost" 
-                ? "http://localhost:3000/api/data"
-                : "https://ui5-mongodb-project.vercel.app/api/data";
-
+            var sUrl = "http://localhost:3000/api/data"; // Use the correct API endpoint
             if (filter) {
                 sUrl += "?filter=" + encodeURIComponent(JSON.stringify(filter));
             }
-
             // Use jQuery to load the data
             $.ajax({
                 url: sUrl,
@@ -49,14 +43,26 @@ sap.ui.define([
                 }
             });
         },
-
-        // Add any additional controller methods here
-        onAfterRendering: function() {
-            // Additional initialization if needed
+        
+        onApplyFilter: function () {
+            var sArchivierungsobjekt = this.byId("archivierungsobjektInput").getValue();
+            var oFilter = {};
+            if (sArchivierungsobjekt) {
+                oFilter.Archivierungsobjekt = sArchivierungsobjekt;
+            }
+            this.loadData(oFilter);
         },
-
-        onExit: function() {
-            // Cleanup if needed
+        
+        onShowEN: function () {
+            console.log("Show EN button pressed");
+            this.getView().getModel("dataModel").setProperty("/showEN", true);
+            this.getView().getModel("dataModel").setProperty("/showDE", false);
+        },
+        
+        onShowDE: function () {
+            console.log("Show DE button pressed");
+            this.getView().getModel("dataModel").setProperty("/showEN", false);
+            this.getView().getModel("dataModel").setProperty("/showDE", true);
         }
     });
 });
