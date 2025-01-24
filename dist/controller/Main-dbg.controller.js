@@ -1,8 +1,9 @@
 sap.ui.define([
     "sap/ui/core/mvc/Controller",
     "sap/ui/model/json/JSONModel",
-    "sap/m/MessageToast"
-], function (Controller, JSONModel, MessageToast) {
+    "sap/m/MessageToast",
+    "sap/ui/demo/mongodb/config/config" // Ensure the correct path to the config file
+], function (Controller, JSONModel, MessageToast, config) {
     "use strict";
     
     return Controller.extend("sap.ui.demo.mongodb.controller.Main", {
@@ -25,7 +26,7 @@ sap.ui.define([
                 MessageToast.show("Data model is not set");
                 return;
             }
-            var sUrl = "http://localhost:3000/api/data"; // Use the correct API endpoint
+            var sUrl = config.apiUrl; // Use the API URL from the configuration file
             if (filter) {
                 sUrl += "?filter=" + encodeURIComponent(JSON.stringify(filter));
             }
@@ -46,9 +47,18 @@ sap.ui.define([
         
         onApplyFilter: function () {
             var sArchivierungsobjekt = this.byId("archivierungsobjektInput").getValue();
+            var sArchivierungsobjekttext = this.byId("textarchivierungsobjekt").getValue();
             var oFilter = {};
             if (sArchivierungsobjekt) {
                 oFilter.Archivierungsobjekt = sArchivierungsobjekt;
+            }
+            if (sArchivierungsobjekttext) {
+                var oModel = this.getView().getModel("dataModel");
+                if (oModel.getProperty("/showEN")) {
+                    oFilter.O_EN = sArchivierungsobjekttext;
+                } else {
+                    oFilter.O_DE = sArchivierungsobjekttext;
+                }
             }
             this.loadData(oFilter);
         },
@@ -63,6 +73,23 @@ sap.ui.define([
             console.log("Show DE button pressed");
             this.getView().getModel("dataModel").setProperty("/showEN", false);
             this.getView().getModel("dataModel").setProperty("/showDE", true);
+        },
+
+        onToggleTable: function () {
+            var oPanel = this.byId("tablePanel");
+            oPanel.setExpanded(!oPanel.getExpanded());
+        },
+
+        onSelectionChange: function (oEvent) {
+            var oTable = oEvent.getSource();
+            var oSelectedItem = oTable.getSelectedItem();
+            if (oSelectedItem) {
+                var oContext = oSelectedItem.getBindingContext("dataModel");
+                var sArchivierungsobjekt = oContext.getProperty("Archivierungsobjekt");
+                console.log("Selected Archivierungsobjekt:", sArchivierungsobjekt);
+                // Assign the selected value to a variable
+                this._selectedArchivierungsobjekt = sArchivierungsobjekt;
+            }
         }
     });
 });

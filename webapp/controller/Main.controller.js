@@ -1,8 +1,9 @@
 sap.ui.define([
     "sap/ui/core/mvc/Controller",
     "sap/ui/model/json/JSONModel",
-    "sap/m/MessageToast"
-], function (Controller, JSONModel, MessageToast) {
+    "sap/m/MessageToast",
+    "sap/ui/demo/mongodb/config/config" // Ensure the correct path to the config file
+], function (Controller, JSONModel, MessageToast, config) {
     "use strict";
     
     return Controller.extend("sap.ui.demo.mongodb.controller.Main", {
