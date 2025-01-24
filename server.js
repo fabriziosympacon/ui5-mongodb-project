@@ -59,6 +59,23 @@ app.get('/api/data', async (req, res) => {
     }
 });
 
+// Middleware to catch 404 errors and log them
+app.use((req, res, next) => {
+    const error = new Error('Not Found');
+    error.status = 404;
+    next(error);
+});
+
+// Error handling middleware
+app.use((error, req, res, next) => {
+    console.error(`Error: ${error.message}, Status Code: ${error.status}`);
+    res.status(error.status || 500).json({
+        error: {
+            message: error.message
+        }
+    });
+});
+
 // Serve the index.html file for all other routes
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
