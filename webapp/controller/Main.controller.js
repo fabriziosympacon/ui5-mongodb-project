@@ -8,6 +8,9 @@ sap.ui.define([
     
     return Controller.extend("sap.ui.demo.mongodb.controller.Main", {
         onInit: function () {
+            // Log the API URL to verify it is set correctly
+            console.log("API URL:", config.apiUrl);
+
             // Initialize the model and set it to the view
             var oModel = new JSONModel({
                 showEN: false, // Initialize the property for toggling columns to show DE columns by default

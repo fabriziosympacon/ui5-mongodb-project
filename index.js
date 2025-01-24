@@ -4,14 +4,18 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 
 const app = express();
-app.use(cors());
+app.use(cors({
+    origin: ['http://localhost:8080', 'https://ui5-mongodb-project.vercel.app'], // Allow both local and Vercel origins
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
 app.use(express.json());
 
 // MongoDB connection URI
 const mongoURI = process.env.MONGODB_URI || 'mongodb+srv://fabriziolantieri:Herrenhausen1868@netzplan.ekaiu.mongodb.net/Netzgrafik?retryWrites=true&w=majority';
 
 // Connect to MongoDB
-mongoose.connect(mongoURI)
+mongoose.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
     .then(() => console.log('MongoDB connected'))
     .catch(err => console.log(err));
 
@@ -27,23 +31,19 @@ const DataSchema = new mongoose.Schema({
 
 const Data = mongoose.model('Data', DataSchema);
 
-// API endpoint to get unique data
+// API endpoint to get data with optional filter
 app.get('/api/data', async (req, res) => {
     const filter = req.query.filter ? JSON.parse(req.query.filter) : {};
     try {
-        const data = await Data.aggregate([
-            { $match: filter },
-            { $group: { _id: "$Archivierungsobjekt", doc: { $first: "$$ROOT" } } },
-            { $replaceRoot: { newRoot: "$doc" } }
-        ]);
+        const data = await Data.find(filter);
         res.json(data);
     } catch (err) {
         res.status(500).send(err);
     }
 });
 
-module.exports = app;
-
 // Start the server
 const port = process.env.PORT || 3000;
 app.listen(port, () => console.log(`Server running on port ${port}`));
+
+module.exports = app;
