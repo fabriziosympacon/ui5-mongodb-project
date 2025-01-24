@@ -5,7 +5,7 @@ const cors = require('cors');
 
 const app = express();
 app.use(cors({
-    origin: ['http://localhost:8080', 'https://ui5-mongodb-project.vercel.app'], // Allow both local and Vercel origins
+    origin: ['http://localhost:8080', 'http://localhost:3000', 'https://ui5-mongodb-project.vercel.app'], // Allow local and Vercel origins
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization']
 }));
