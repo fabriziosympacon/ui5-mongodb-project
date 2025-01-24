@@ -21,7 +21,7 @@
     "test": "npm run lint && npm run test-ui5",
     "build-self-contained": "ui5 build self-contained -a --clean-dest",
     "serve-dist": "ws --compress -d dist",
-    "vercel-build": "npm run build"
+    "vercel-build": "ui5 build --all --dest dist"
   },
   "keywords": [],
   "author": "",
