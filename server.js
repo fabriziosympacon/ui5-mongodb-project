@@ -7,7 +7,6 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// MongoDB connection with error handling
 mongoose.connect(process.env.MONGODB_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
@@ -19,7 +18,6 @@ mongoose.connect(process.env.MONGODB_URI, {
     process.exit(1);
 });
 
-// Optimized schema with indexes
 const DataSchema = new mongoose.Schema({
     Archivierungsobjekt: { type: String, index: true },
     O_EN: String,
@@ -31,7 +29,6 @@ const DataSchema = new mongoose.Schema({
 
 const Data = mongoose.model('Data', DataSchema);
 
-// Optimized API endpoint with error handling
 app.get('/api/data', async (req, res) => {
     try {
         const filter = req.query.filter ? JSON.parse(req.query.filter) : {};
@@ -51,10 +48,8 @@ app.get('/api/data', async (req, res) => {
     }
 });
 
-// Export for Vercel serverless function
 module.exports = app;
 
-// Start server only if not running on Vercel
 if (process.env.NODE_ENV !== 'production') {
     const port = process.env.PORT || 3000;
     app.listen(port, () => console.log(`Server running on port ${port}`));
