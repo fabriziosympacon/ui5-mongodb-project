@@ -1,57 +1,41 @@
 <mvc:View controllerName="sap.ui.demo.mongodb.controller.Main"
           xmlns:mvc="sap.ui.core.mvc"
-          xmlns="sap.m">
-    <Page title="MongoDB Data">
+          xmlns="sap.m"
+          xmlns:table="sap.ui.table">
+    <Page title="Netzplan Archivierungsobjekte">
         <content>
             <VBox>
-                <HBox>
-                    <Label text="Archivierungsobjekt: "/>
+                <HBox alignItems="Center">
                     <Input id="archivierungsobjektInput" placeholder="Enter Archivierungsobjekt value"/>
+                    <Input id="textarchivierungsobjekt" placeholder="Enter Name value"/>
                     <Button text="Apply Filter" press="onApplyFilter"/>
-                </HBox>
-                <HBox>
                     <Button text="Show EN" press="onShowEN"/>
                     <Button text="Show DE" press="onShowDE"/>
                 </HBox>
-                <Table id="dataTable" items="{dataModel>/data}">
-                    <headerToolbar>
-                        <Toolbar>
-                            <Title text="Data Table"/>
-                        </Toolbar>
-                    </headerToolbar>
-                    <columns>
-                        <Column>
-                            <Text text="Archivierungsobjekt"/>
-                        </Column>
-                        <Column visible="{dataModel>/showEN}">
-                            <Text text="O_EN"/>
-                        </Column>
-                        <Column visible="{dataModel>/showDE}">
-                            <Text text="O_DE"/>
-                        </Column>
-                        <Column>
-                            <Text text="Vorgaenger"/>
-                        </Column>
-                        <Column visible="{dataModel>/showEN}">
-                            <Text text="V_EN"/>
-                        </Column>
-                        <Column visible="{dataModel>/showDE}">
-                            <Text text="V_DE"/>
-                        </Column>
-                    </columns>
-                    <items>
-                        <ColumnListItem>
-                            <cells>
-                                <Text text="{dataModel>Archivierungsobjekt}"/>
-                                <Text text="{dataModel>O_EN}" visible="{dataModel>/showEN}"/>
-                                <Text text="{dataModel>O_DE}" visible="{dataModel>/showDE}"/>
-                                <Text text="{dataModel>Vorgaenger}"/>
-                                <Text text="{dataModel>V_EN}" visible="{dataModel>/showEN}"/>
-                                <Text text="{dataModel>V_DE}" visible="{dataModel>/showDE}"/>
-                            </cells>
-                        </ColumnListItem>
-                    </items>
-                </Table>
+                <Panel id="tablePanel" headerText="Archivierungsobjekte" expandable="true" expanded="true">
+                    <table:Table id="dataTable" rows="{dataModel>/data}" visibleRowCount="10" selectionMode="Single" selectionBehavior="Row" rowSelectionChange="onSelectionChange">
+                        <table:columns>
+                            <table:Column>
+                                <Label text="Archivierungsobjekt"/>
+                                <table:template>
+                                    <Text text="{dataModel>Archivierungsobjekt}"/>
+                                </table:template>
+                            </table:Column>
+                            <table:Column visible="{dataModel>/showEN}">
+                                <Label text="O_EN"/>
+                                <table:template>
+                                    <Text text="{dataModel>O_EN}" visible="{dataModel>/showEN}"/>
+                                </table:template>
+                            </table:Column>
+                            <table:Column visible="{dataModel>/showDE}">
+                                <Label text="O_DE"/>
+                                <table:template>
+                                    <Text text="{dataModel>O_DE}" visible="{dataModel>/showDE}"/>
+                                </table:template>
+                            </table:Column>
+                        </table:columns>
+                    </table:Table>
+                </Panel>
             </VBox>
         </content>
     </Page>

@@ -1,4 +1,3 @@
-js
 require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
@@ -9,10 +8,20 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+if (!process.env.MONGODB_URI) {
+    console.error('MONGODB_URI is not defined in environment variables');
+    process.exit(1);
+}
+
 mongoose.connect(process.env.MONGODB_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
     serverSelectionTimeoutMS: 5000
+}).then(() => {
+    console.log('Connected to MongoDB Atlas');
+}).catch(err => {
+    console.error('MongoDB connection error:', err);
+    process.exit(1);
 });
 
 const DataSchema = new mongoose.Schema({
@@ -36,16 +45,7 @@ app.get('/api/data', async (req, res) => {
     }
 });
 
-// Error handling middleware
-app.use((error, req, res, next) => {
-    res.status(error.status || 500);
-    res.json({ error: error.message });
-});
+const port = process.env.PORT || 3000;
+app.listen(port, () => console.log(`Server running on port ${port}`));
 
 module.exports = app;
-
-// Start server only if not running on Vercel
-if (process.env.NODE_ENV !== 'production') {
-    const port = process.env.PORT || 3000;
-    app.listen(port, () => console.log(`Server running on port ${port}`));
-}
