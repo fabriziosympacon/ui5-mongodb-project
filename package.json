@@ -10,7 +10,7 @@
   },
   "scripts": {
     "start": "concurrently \"npm run start-server\" \"npm run start-ui5\"",
-    "start-server": "node index.js",
+    "start-server": "node server.js",
     "start-ui5": "ui5 serve",
     "build": "ui5 build --all --dest dist",
     "postinstall": "npm install -g @ui5/cli",

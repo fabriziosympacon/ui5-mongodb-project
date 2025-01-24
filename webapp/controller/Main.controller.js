@@ -1,16 +1,12 @@
 sap.ui.define([
     "sap/ui/core/mvc/Controller",
     "sap/ui/model/json/JSONModel",
-    "sap/m/MessageToast",
-    "sap/ui/demo/mongodb/config/config" // Ensure the correct path to the config file
-], function (Controller, JSONModel, MessageToast, config) {
+    "sap/m/MessageToast"
+], function (Controller, JSONModel, MessageToast) {
     "use strict";
     
     return Controller.extend("sap.ui.demo.mongodb.controller.Main", {
         onInit: function () {
-            // Log the API URL to verify it is set correctly
-            console.log("API URL:", config.apiUrl);
-
             // Initialize the model and set it to the view
             var oModel = new JSONModel({
                 showEN: false, // Initialize the property for toggling columns to show DE columns by default
@@ -29,7 +25,7 @@ sap.ui.define([
                 MessageToast.show("Data model is not set");
                 return;
             }
-            var sUrl = config.apiUrl; // Use the API URL from the configuration file
+            var sUrl = "http://localhost:3000/api/data"; // Use the correct API endpoint
             if (filter) {
                 sUrl += "?filter=" + encodeURIComponent(JSON.stringify(filter));
             }
