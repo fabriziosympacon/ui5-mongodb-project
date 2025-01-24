@@ -4,9 +4,17 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 
 const app = express();
-app.use(cors());
+
+// Update CORS configuration
+app.use(cors({
+    origin: ['http://localhost:8080', 'https://ui5-mongodb-project.vercel.app'],
+    methods: ['GET', 'POST', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
 app.use(express.json());
 
+// MongoDB connection with error handling
 mongoose.connect(process.env.MONGODB_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
@@ -15,7 +23,6 @@ mongoose.connect(process.env.MONGODB_URI, {
     console.log('Connected to MongoDB Atlas');
 }).catch(err => {
     console.error('MongoDB connection error:', err);
-    process.exit(1);
 });
 
 const DataSchema = new mongoose.Schema({
