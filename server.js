@@ -7,17 +7,21 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// MongoDB connection URI
-const mongoURI = process.env.MONGODB_URI || 'mongodb+srv://fabriziolantieri:Herrenhausen1868@netzplan.ekaiu.mongodb.net/Netzgrafik?retryWrites=true&w=majority';
+// MongoDB connection with error handling
+mongoose.connect(process.env.MONGODB_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    serverSelectionTimeoutMS: 5000
+}).then(() => {
+    console.log('Connected to MongoDB Atlas');
+}).catch(err => {
+    console.error('MongoDB connection error:', err);
+    process.exit(1);
+});
 
-// Connect to MongoDB
-mongoose.connect(mongoURI)
-    .then(() => console.log('MongoDB connected'))
-    .catch(err => console.log(err));
-
-// Define a schema for the data
+// Optimized schema with indexes
 const DataSchema = new mongoose.Schema({
-    Archivierungsobjekt: String,
+    Archivierungsobjekt: { type: String, index: true },
     O_EN: String,
     O_DE: String,
     Vorgaenger: String,
@@ -27,23 +31,31 @@ const DataSchema = new mongoose.Schema({
 
 const Data = mongoose.model('Data', DataSchema);
 
-// API endpoint to get unique data
+// Optimized API endpoint with error handling
 app.get('/api/data', async (req, res) => {
-    const filter = req.query.filter ? JSON.parse(req.query.filter) : {};
     try {
+        const filter = req.query.filter ? JSON.parse(req.query.filter) : {};
         const data = await Data.aggregate([
             { $match: filter },
-            { $group: { _id: "$Archivierungsobjekt", doc: { $first: "$$ROOT" } } },
+            { $group: { 
+                _id: "$Archivierungsobjekt",
+                doc: { $first: "$$ROOT" }
+            }},
             { $replaceRoot: { newRoot: "$doc" } }
-        ]);
+        ]).exec();
+        
         res.json(data);
     } catch (err) {
-        res.status(500).send(err);
+        console.error('API Error:', err);
+        res.status(500).json({ error: 'Internal Server Error' });
     }
 });
 
+// Export for Vercel serverless function
 module.exports = app;
 
-// Start the server
-const port = process.env.PORT || 3000;
-app.listen(port, () => console.log(`Server running on port ${port}`));
+// Start server only if not running on Vercel
+if (process.env.NODE_ENV !== 'production') {
+    const port = process.env.PORT || 3000;
+    app.listen(port, () => console.log(`Server running on port ${port}`));
+}
