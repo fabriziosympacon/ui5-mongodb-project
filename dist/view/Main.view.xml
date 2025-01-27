@@ -1,7 +1,8 @@
 <mvc:View controllerName="sap.ui.demo.mongodb.controller.Main"
           xmlns:mvc="sap.ui.core.mvc"
           xmlns="sap.m"
-          xmlns:table="sap.ui.table">
+          xmlns:table="sap.ui.table"
+          xmlns:core="sap.ui.core">
     <Page title="Netzplan Archivierungsobjekte">
         <content>
             <VBox>
@@ -31,6 +32,42 @@
                                 <Label text="O_DE"/>
                                 <table:template>
                                     <Text text="{dataModel>O_DE}" visible="{dataModel>/showDE}"/>
+                                </table:template>
+                            </table:Column>
+                        </table:columns>
+                    </table:Table>
+                </Panel>
+                <Panel id="vorgaengerPanel" 
+                        headerText="{parts:[
+                            {path:'dataModel>/selectedObject/Archivierungsobjekt'},
+                            {path:'dataModel>/selectedObject/O_EN'},
+                            {path:'dataModel>/selectedObject/O_DE'},
+                            {path:'dataModel>/showEN'}
+                        ], formatter:'.formatVorgaengerHeader'}"
+                        expandable="true" 
+                        expanded="false"
+                        visible="{= !!${dataModel>/selectedObject}}">
+                    <table:Table id="vorgaengerTable" 
+                                rows="{dataModel>/vorgaengerData}" 
+                                visibleRowCount="5" 
+                                selectionMode="None">
+                        <table:columns>
+                            <table:Column>
+                                <Label text="Vorgänger"/>
+                                <table:template>
+                                    <Text text="{dataModel>Vorgaenger}"/>
+                                </table:template>
+                            </table:Column>
+                            <table:Column visible="{dataModel>/showEN}">
+                                <Label text="V_EN"/>
+                                <table:template>
+                                    <Text text="{dataModel>V_EN}"/>
+                                </table:template>
+                            </table:Column>
+                            <table:Column visible="{dataModel>/showDE}">
+                                <Label text="V_DE"/>
+                                <table:template>
+                                    <Text text="{dataModel>V_DE}"/>
                                 </table:template>
                             </table:Column>
                         </table:columns>
