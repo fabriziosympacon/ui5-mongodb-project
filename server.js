@@ -36,12 +36,16 @@ const DataSchema = new mongoose.Schema({
 const Data = mongoose.model('Data', DataSchema);
 
 app.get('/api/data', async (req, res) => {
+    const filter = req.query.filter ? JSON.parse(req.query.filter) : {};
     try {
-        const data = await Data.find();
+        const data = await Data.aggregate([
+            { $match: filter },
+            { $group: { _id: "$Archivierungsobjekt", doc: { $first: "$$ROOT" } } },
+            { $replaceRoot: { newRoot: "$doc" } }
+        ]);
         res.json(data);
     } catch (err) {
-        console.error('API Error:', err);
-        res.status(500).json({ error: 'Internal Server Error' });
+        res.status(500).send(err);
     }
 });
 
