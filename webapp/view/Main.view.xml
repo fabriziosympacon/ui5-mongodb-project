@@ -45,7 +45,7 @@
                     <table:Table id="vorgaengerTable" 
                                 rows="{dataModel>/vorgaengerData}" 
                                 visibleRowCount="5" 
-                                selectionMode="None">
+                                selectionMode="MultiToggle" selectionBehavior="Row">
                         <table:columns>
                             <table:Column>
                                 <Label text="Vorgänger"/>

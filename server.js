@@ -37,12 +37,23 @@ const Data = mongoose.model('Data', DataSchema);
 
 app.get('/api/data', async (req, res) => {
     const filter = req.query.filter ? JSON.parse(req.query.filter) : {};
+    const groupByArchivierungsobjekt = req.query.groupByArchivierungsobjekt === 'true';
+    
     try {
-        const data = await Data.aggregate([
-            { $match: filter },
-            { $group: { _id: "$Archivierungsobjekt", doc: { $first: "$$ROOT" } } },
-            { $replaceRoot: { newRoot: "$doc" } }
-        ]);
+        let data;
+        if (groupByArchivierungsobjekt) {
+            data = await Data.aggregate([
+                { $match: filter },
+                { $group: { 
+                    _id: "$Archivierungsobjekt", 
+                    Archivierungsobjekt: { $first: "$Archivierungsobjekt" },
+                    O_EN: { $first: "$O_EN" },
+                    O_DE: { $first: "$O_DE" }
+                }}
+            ]);
+        } else {
+            data = await Data.find(filter);
+        }
         res.json(data);
     } catch (err) {
         res.status(500).send(err);

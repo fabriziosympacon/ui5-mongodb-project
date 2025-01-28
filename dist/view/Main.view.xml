@@ -38,19 +38,14 @@
                     </table:Table>
                 </Panel>
                 <Panel id="vorgaengerPanel" 
-                        headerText="{parts:[
-                            {path:'dataModel>/selectedObject/Archivierungsobjekt'},
-                            {path:'dataModel>/selectedObject/O_EN'},
-                            {path:'dataModel>/selectedObject/O_DE'},
-                            {path:'dataModel>/showEN'}
-                        ], formatter:'.formatVorgaengerHeader'}"
+                        headerText="{dataModel>/vorgaengerPanelHeader}"
                         expandable="true" 
                         expanded="false"
                         visible="{= !!${dataModel>/selectedObject}}">
                     <table:Table id="vorgaengerTable" 
                                 rows="{dataModel>/vorgaengerData}" 
                                 visibleRowCount="5" 
-                                selectionMode="None">
+                                selectionMode="MultiToggle" selectionBehavior="Row">
                         <table:columns>
                             <table:Column>
                                 <Label text="Vorgänger"/>

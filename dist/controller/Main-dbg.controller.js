@@ -12,96 +12,107 @@ sap.ui.define([
                 showDE: true,
                 data: [],
                 selectedObject: null,
-                vorgaengerData: []
+                vorgaengerPanelHeader: "Vorgängerobjekte"
             });
             this.getView().setModel(oModel, "dataModel");
-            this.loadData();
+            console.log("Model initialized and set to view");
+            this.loadData(null, true); // Initial load with grouping
         },
         
-        loadData: function (filter, callback) {
+        loadData: function (filter, groupBy, callback) {
             var oModel = this._getDataModel();
             if (!oModel) {
                 MessageToast.show("Data model is not set");
                 return;
             }
 
-             // Reset vorgaengerData
-             oModel.setProperty("/selectedObject", null);
-             oModel.setProperty("/vorgaengerData", null);
+            // Reset main data
+            oModel.setProperty("/selectedObject", null);
 
             // Use environment-aware URL
             var sUrl = window.location.hostname === "localhost" 
                 ? "http://localhost:3000/api/data"
                 : "https://ui5-mongodb-project.vercel.app/api/data";
 
-                if (filter) {
-                    console.log("Filter:", filter); // Debug log
-                    sUrl += "?filter=" + encodeURIComponent(JSON.stringify(filter));
-                }
-            
+            // Add groupByArchivierungsobjekt parameter if needed
+            var queryParams = [];
+            if (groupBy) {
+                queryParams.push("groupByArchivierungsobjekt=true");
+            }
 
-            
-                $.ajax({
-                    url: sUrl,
-                    method: "GET",
-                    success: function(data) {
-                        console.log("Data loaded successfully:", data);
-                        // Only set main data
-                        oModel.setProperty("/data", data);
-                        
-                        // If it's a filter request with single result
-                        if (filter && data && data.length === 1) {
-                            var oSelectedObject = data[0];
-                            oModel.setProperty("/selectedObject", oSelectedObject);
-                            
-                            // Set Vorgänger data only if Vorgaenger exists
-                            if (oSelectedObject.Vorgaenger) {
-                                oModel.setProperty("/vorgaengerData", [{
-                                    Vorgaenger: oSelectedObject.Vorgaenger,
-                                    V_EN: oSelectedObject.V_EN,
-                                    V_DE: oSelectedObject.V_DE
-                                }]);
-                            }
-                        }
+            if (filter) {
+                console.log("Filter for data:", filter); // Debug log
+                queryParams.push("filter=" + encodeURIComponent(JSON.stringify(filter)));
+            }
 
-                        if (callback) {
-                            callback(data);
-                        }
-                    },
-                    error: function(jqXHR, textStatus, errorThrown) {
-                        console.error("Failed to load data:", textStatus, errorThrown);
-                        MessageToast.show("Failed to load data");
+            sUrl += "?" + queryParams.join("&");
+
+            console.log("Request URL:", sUrl);
+            $.ajax({
+                url: sUrl,
+                method: "GET",
+                success: function(data) {
+                    console.log("Data loaded successfully:", data);
+                    // Log all database entries for the given filter
+                    console.log("All DB entries for data filter:", filter, data);
+
+                    // Only set main data
+                    oModel.setProperty("/data", data);
+                    
+                    // Refresh the model to update the view
+                    oModel.refresh(true);
+
+                    // If it's a filter request with multiple results
+                    if (filter && data && data.length > 0) {
+                        var oSelectedObject = data[0];
+                        oModel.setProperty("/selectedObject", oSelectedObject);
+
+                        // Update header text directly
+                        var sHeaderText = "Vorgängerobjekt: " + oSelectedObject.Archivierungsobjekt;
+                        oModel.setProperty("/vorgaengerPanelHeader", sHeaderText);
+                        console.log("Updated header text:", sHeaderText);
                     }
-                });
+
+                    if (callback) {
+                        callback(data);
+                    }
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    console.error("Failed to load data:", textStatus, errorThrown);
+                    MessageToast.show("Failed to load data");
+                }
+            });
         },
+
         onApplyFilter: function () {
             var sArchivierungsobjekt = this.byId("archivierungsobjektInput").getValue();
             var sArchivierungsobjekttext = this.byId("textarchivierungsobjekt").getValue();
             var oFilter = {};
             var that = this;
-        
+
             // Reset Vorgänger data
             this._getDataModel().setProperty("/selectedObject", null);
-            this._getDataModel().setProperty("/vorgaengerData", null);
-        
+            this._getDataModel().setProperty("/vorgaengerPanelHeader", "Vorgängerobjekte");
+
             if (!sArchivierungsobjekt && !sArchivierungsobjekttext) {
                 // Load all data without filter
-                this.loadData();
+                this.loadData(null, true); // Use the initial load function with grouping
                 return;
             }
-        
+
             if (sArchivierungsobjekt) {
                 oFilter.Archivierungsobjekt = sArchivierungsobjekt;
-                this.loadData(oFilter, function(data) {
+                this.loadData(oFilter, true, function(data) {
                     if (data && data.length > 0) {
+                        console.log("All DB entries for data filter:", oFilter, data);
                         var oSelectedObject = data[0];
                         console.log("Setting selected object:", oSelectedObject);
                         that._getDataModel().setProperty("/selectedObject", oSelectedObject);
-                        that._getDataModel().setProperty("/vorgaengerData", [{
-                            Vorgaenger: oSelectedObject.Vorgaenger,
-                            V_EN: oSelectedObject.V_EN,
-                            V_DE: oSelectedObject.V_DE
-                        }]);
+
+                        // Update header text directly
+                        var sHeaderText = "Vorgängerobjekt: " + oSelectedObject.Archivierungsobjekt;
+                        that._getDataModel().setProperty("/vorgaengerPanelHeader", sHeaderText);
+                        console.log("Updated header text:", sHeaderText);
                     }
                 });
             } else if (sArchivierungsobjekttext) {
@@ -111,7 +122,7 @@ sap.ui.define([
                 } else {
                     oFilter.O_DE = sArchivierungsobjekttext;
                 }
-                this.loadData(oFilter);
+                this.loadData(oFilter, true);
             }
         },
         
@@ -150,21 +161,6 @@ sap.ui.define([
                 this.byId("archivierungsobjektInput").setValue(oSelectedObject.Archivierungsobjekt);
                 
             }
-        },
-        formatVorgaengerHeader: function(sArchivierungsobjekt, sEN, sDE, bShowEN) {
-            console.log("Formatter called with:", {
-                sArchivierungsobjekt: sArchivierungsobjekt,
-                sEN: sEN,
-                sDE: sDE,
-                bShowEN: bShowEN
-            });
-            
-            if (!sArchivierungsobjekt) {
-                return "No object selected";
-            }
-            
-            var sDescription = bShowEN ? sEN : sDE;
-            return "Vorgänger für " + sArchivierungsobjekt + " (" + sDescription + ")";
         }
     });
 });
