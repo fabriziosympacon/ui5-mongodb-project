@@ -11,30 +11,34 @@ sap.ui.define([
                 showEN: false,
                 showDE: true,
                 data: [],
+                vorgaengerData: [],
                 selectedObject: null,
                 vorgaengerPanelHeader: "Vorgängerobjekte"
             });
             this.getView().setModel(oModel, "dataModel");
             console.log("Model initialized and set to view");
-            this.loadData(null, true); // Initial load with grouping
+            this.loadData(null, true, 'data'); // Initial load with grouping
         },
         
-        loadData: function (filter, groupBy, callback) {
+        loadData: function (filter, groupBy, endpoint, callback) {
             var oModel = this._getDataModel();
             if (!oModel) {
                 MessageToast.show("Data model is not set");
                 return;
             }
 
-            // Reset main data
+            // Reset main data and vorgaengerData
             oModel.setProperty("/selectedObject", null);
+            oModel.setProperty("/vorgaengerData", []);
 
             // Use environment-aware URL
-            var sUrl = window.location.hostname === "localhost" 
-                ? "http://localhost:3000/api/data"
-                : "https://ui5-mongodb-project.vercel.app/api/data";
+            var baseUrl = window.location.hostname === "localhost" 
+                ? "http://localhost:3000/api/"
+                : "https://ui5-mongodb-project.vercel.app/api/";
 
-            // Add groupByArchivierungsobjekt parameter if needed
+            var sUrl = baseUrl + endpoint;
+
+            // Build query parameters
             var queryParams = [];
             if (groupBy) {
                 queryParams.push("groupByArchivierungsobjekt=true");
@@ -45,7 +49,9 @@ sap.ui.define([
                 queryParams.push("filter=" + encodeURIComponent(JSON.stringify(filter)));
             }
 
-            sUrl += "?" + queryParams.join("&");
+            if (queryParams.length > 0) {
+                sUrl += "?" + queryParams.join("&");
+            }
 
             console.log("Request URL:", sUrl);
             $.ajax({
@@ -96,19 +102,22 @@ sap.ui.define([
 
             if (!sArchivierungsobjekt && !sArchivierungsobjekttext) {
                 // Load all data without filter
-                this.loadData(null, true); // Use the initial load function with grouping
+                this.loadData(null, true, 'data'); // Use the initial load function with grouping
                 return;
             }
 
             if (sArchivierungsobjekt) {
                 oFilter.Archivierungsobjekt = sArchivierungsobjekt;
-                this.loadData(oFilter, true, function(data) {
+                this.loadData(oFilter, true, 'data', function(data) {
                     if (data && data.length > 0) {
                         console.log("All DB entries for data filter:", oFilter, data);
                         var oSelectedObject = data[0];
                         console.log("Setting selected object:", oSelectedObject);
                         that._getDataModel().setProperty("/selectedObject", oSelectedObject);
-
+                        
+                        console.log("Calling loadVorgaengerData with:", oSelectedObject.Archivierungsobjekt);
+                        that.loadData({ archivierungsobjekt: oSelectedObject.Archivierungsobjekt }, false, 'vorgaenger');
+                        
                         // Update header text directly
                         var sHeaderText = "Vorgängerobjekt: " + oSelectedObject.Archivierungsobjekt;
                         that._getDataModel().setProperty("/vorgaengerPanelHeader", sHeaderText);
@@ -122,10 +131,10 @@ sap.ui.define([
                 } else {
                     oFilter.O_DE = sArchivierungsobjekttext;
                 }
-                this.loadData(oFilter, true);
+                this.loadData(oFilter, true, 'data');
             }
         },
-        
+
         onShowEN: function () {
             console.log("Show EN button pressed");
             this.getView().getModel("dataModel").setProperty("/showEN", true);
@@ -159,7 +168,8 @@ sap.ui.define([
                 
                 // Set value to input field
                 this.byId("archivierungsobjektInput").setValue(oSelectedObject.Archivierungsobjekt);
-                
+                 // Fetch vorgaenger data
+                 this.loadData({ archivierungsobjekt: oSelectedObject.Archivierungsobjekt }, false, 'vorgaenger');
             }
         }
     });

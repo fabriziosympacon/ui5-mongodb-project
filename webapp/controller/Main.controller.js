@@ -11,8 +11,10 @@ sap.ui.define([
                 showEN: false,
                 showDE: true,
                 data: [],
+                vorgaengerData: [],
                 selectedObject: null,
-                vorgaengerPanelHeader: "Vorgängerobjekte"
+                vorgaengerPanelHeader: "Vorgängerobjekte",
+                graphlookusData: [] // Add property for graphlookus data
             });
             this.getView().setModel(oModel, "dataModel");
             console.log("Model initialized and set to view");
@@ -93,6 +95,7 @@ sap.ui.define([
             // Reset Vorgänger data
             this._getDataModel().setProperty("/selectedObject", null);
             this._getDataModel().setProperty("/vorgaengerPanelHeader", "Vorgängerobjekte");
+            this._getDataModel().setProperty("/vorgaengerData", []); // Clear Vorgänger data
 
             if (!sArchivierungsobjekt && !sArchivierungsobjekttext) {
                 // Load all data without filter
@@ -102,12 +105,15 @@ sap.ui.define([
 
             if (sArchivierungsobjekt) {
                 oFilter.Archivierungsobjekt = sArchivierungsobjekt;
-                this.loadData(oFilter, true, function(data) {
+                this.loadData(oFilter, true, function (data) {
                     if (data && data.length > 0) {
                         console.log("All DB entries for data filter:", oFilter, data);
                         var oSelectedObject = data[0];
                         console.log("Setting selected object:", oSelectedObject);
                         that._getDataModel().setProperty("/selectedObject", oSelectedObject);
+
+                        console.log("Calling loadVorgaengerData with:", oSelectedObject.Archivierungsobjekt);
+                        that.loadVorgaengerData(oSelectedObject.Archivierungsobjekt);
 
                         // Update header text directly
                         var sHeaderText = "Vorgängerobjekt: " + oSelectedObject.Archivierungsobjekt;
@@ -123,6 +129,121 @@ sap.ui.define([
                     oFilter.O_DE = sArchivierungsobjekttext;
                 }
                 this.loadData(oFilter, true);
+            }
+        },
+
+        loadVorgaengerData: function (archivierungsobjekt) {
+            console.log("loadVorgaengerData called with:", archivierungsobjekt);
+
+            // Use environment-aware URL
+            var sUrl = window.location.hostname === "localhost"
+                ? "http://localhost:3000/api/vorgaenger"
+                : "https://ui5-mongodb-project.vercel.app/api/vorgaenger";
+
+            sUrl += `?archivierungsobjekt=${encodeURIComponent(archivierungsobjekt)}`;
+
+            fetch(sUrl)
+                .then(response => response.json())
+                .then(data => {
+                    console.log("API response for vorgaenger:", data); // Log the API response
+
+                    var oModel = this.getView().getModel("dataModel");
+                    if (data.length > 0 && data[0].vorgaengerHierarchy) {
+                        oModel.setProperty("/vorgaengerData", data[0].vorgaengerHierarchy);
+                    } else {
+                        oModel.setProperty("/vorgaengerData", []);
+                    }
+                    oModel.refresh(true); //force a model refresh.
+                    console.log("vorgaengerData after update:", oModel.getProperty("/vorgaengerData")); // Log the updated model data
+                })
+                .catch(error => console.error('Error fetching data:', error));
+                this.loadGraphlookusData(archivierungsobjekt);
+        },
+
+        loadGraphlookusData: function (archivierungsobjekt) {
+            console.log("loadGraphlookusData called with:", archivierungsobjekt);
+
+            // Use environment-aware URL
+            var sUrl = window.location.hostname === "localhost"
+                ? "http://localhost:3000/api/graphlookus"
+                : "https://ui5-mongodb-project.vercel.app/api/graphlookus";
+
+            sUrl += `?archivierungsobjekt=${encodeURIComponent(archivierungsobjekt)}`;
+
+            fetch(sUrl)
+                .then(response => response.json())
+                .then(data => {
+                    console.log("API response for graphlookus:", data); // Log the API response
+
+                    var oModel = this.getView().getModel("dataModel");
+                    if (data && data.length > 0) {
+                        oModel.setProperty("/graphlookusData", data); // Set all graphlookus data
+                    } else {
+                        oModel.setProperty("/graphlookusData", []);
+                    }
+                    oModel.refresh(true); //force a model refresh.
+                    console.log("graphlookusData after update:", oModel.getProperty("/graphlookusData")); // Log the updated model data
+                    this.renderGraph(); //Render Graph
+                })
+                .catch(error => console.error('Error fetching graphlookus data:', error));
+        },
+
+        renderGraph: function() {
+            //Get graph data from the model.
+            var oModel = this.getView().getModel("dataModel");
+            var graphData = oModel.getProperty("/graphlookusData");
+            if(graphData.length === 0){
+                return; //do not render if no data.
+            }
+
+            //Get the container for the graph.
+            var graphContainer = document.getElementById("graphContainer");
+            if(!graphContainer){
+                console.error("Graph container not found.");
+                return;
+            }
+
+            //Here you will need to add the code to render the graph.
+            //This is where you would use a graph library like cytoscape.js or d3.js
+            //Example using console.log to show the data.
+            console.log("Rendering graph with data:", graphData);
+
+            //Example using cytoscape.js
+            if(typeof cytoscape !== 'undefined'){
+                //Clear any existing graph.
+                graphContainer.innerHTML = "";
+
+                cytoscape({
+                    container: graphContainer,
+                    elements: graphData,
+                    style: [
+                        {
+                            selector: 'node',
+                            style: {
+                                'background-color': '#666',
+                                'label': 'data(id)'
+                            }
+                        },
+
+                        {
+                            selector: 'edge',
+                            style: {
+                                'width': 3,
+                                'line-color': '#ccc',
+                                'target-arrow-color': '#ccc',
+                                'target-arrow-shape': 'triangle',
+                                'curve-style': 'bezier'
+                            }
+                        }
+                    ],
+                    layout: {
+                        name: 'breadthfirst',
+                        directed: true,
+                        padding: 10
+                    }
+                });
+            } else {
+                console.warn("cytoscape.js is not loaded.");
             }
         },
         
@@ -153,13 +274,18 @@ sap.ui.define([
             if (aSelectedIndices.length > 0) {
                 var oContext = oTable.getContextByIndex(aSelectedIndices[0]);
                 var oSelectedObject = oContext.getObject();
-                
+
                 // Set selected object to model
                 this._getDataModel().setProperty("/selectedObject", oSelectedObject);
-                
+
                 // Set value to input field
                 this.byId("archivierungsobjektInput").setValue(oSelectedObject.Archivierungsobjekt);
-                
+                // Fetch vorgaenger data
+                this.loadVorgaengerData(oSelectedObject.Archivierungsobjekt);
+            } else {
+                // Clear Vorgänger data when selection is cleared
+                this._getDataModel().setProperty("/vorgaengerData", []);
+                this._getDataModel().setProperty("/selectedObject", null);
             }
         }
     });

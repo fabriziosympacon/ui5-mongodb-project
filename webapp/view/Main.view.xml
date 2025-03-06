@@ -68,6 +68,9 @@
                         </table:columns>
                     </table:Table>
                 </Panel>
+                <Panel id="graphPanel" headerText="Netzplangrafik" expandable="true" expanded="false" visible="{= !!${dataModel>/selectedObject}}">
+                    <core:HTML content='&lt;div id="graphContainer" style="width: 100%; height: 400px;"&gt;&lt;/div&gt;'/>
+                </Panel>
             </VBox>
         </content>
     </Page>
