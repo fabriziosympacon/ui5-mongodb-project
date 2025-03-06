@@ -85,73 +85,17 @@ app.get('/api/vorgaenger', async (req, res) => {
                     vorgaengerHierarchy: 1
                 }
             }
-                ]);
-                res.json(result);
-            } catch (err) {
-                res.status(500).send(err);
-            }
-        });
-        
-        app.get('/api/graphlookus', async (req, res) => {
-            const archivierungsobjekt = req.query.archivierungsobjekt;
-        
-            try {
-                const result = await Data.aggregate([
-                    { $match: { Archivierungsobjekt: archivierungsobjekt } },
-                    {
-                        $graphLookup: {
-                            from: 'ARCH_NET',
-                            startWith: '$Vorgaenger',
-                            connectFromField: 'Vorgaenger',
-                            connectToField: 'Archivierungsobjekt',
-                            as: 'vorgaengerHierarchy',
-                            maxDepth: 10,
-                            depthField: 'level'
-                        }
-                    },
-                    {
-                        $project: {
-                            _id: 1,
-                            Archivierungsobjekt: 1,
-                            Vorgaenger:1,
-                            vorgaengerHierarchy: 1
-                        }
-                    }
-                ]);
-        
-                if (result.length === 0) {
-                    return res.json([]);
-                }
-        
-                const nodes = new Set();
-                const edges = [];
-                const graphData = [];
-        
-                // Add the initial node
-                nodes.add(result[0].Archivierungsobjekt);
-                graphData.push({ data: { id: result[0].Archivierungsobjekt } });
-        
-                result[0].vorgaengerHierarchy.forEach(item => {
-                    nodes.add(item.Archivierungsobjekt);
-                    nodes.add(item.Vorgaenger);
-                    edges.push({ source: item.Vorgaenger, target: item.Archivierungsobjekt });
-                });
-        
-                nodes.forEach(node => {
-                    graphData.push({ data: { id: node } });
-                });
-        
-                edges.forEach(edge => {
-                    graphData.push({ data: { source: edge.source, target: edge.target } });
-                });
-        
-                res.json(graphData);
-            } catch (err) {
-                res.status(500).send(err);
-            }
-        });
-        
-        const port = process.env.PORT || 3000;
-        app.listen(port, () => console.log(`Server running on port ${port}`));
-        
-        module.exports = app;
+        ]);
+
+
+
+        res.json(result);
+    } catch (err) {
+        res.status(500).send(err);
+    }
+});
+
+const port = process.env.PORT || 3000;
+app.listen(port, () => console.log(`Server running on port ${port}`));
+
+module.exports = app;
